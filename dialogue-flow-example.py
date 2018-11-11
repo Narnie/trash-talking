@@ -16,6 +16,7 @@ import string
 import sys
 import pyaudio
 import wave
+import asyncio
 
 # play text file
 def play(filename):
@@ -37,17 +38,10 @@ def play(filename):
 
     p.terminate()
 
-# For testing 
-# 
-# if __name__ == '__main__':
-#     text = "The Main Street!"
-#     filename = speak(text)
-#     play(filename)
-#     print("done")
 
 
 # [START dialogflow_detect_intent_with_texttospeech_response]
-def detect_intent_with_texttospeech_response(project_id, session_id, texts,
+async def detect_intent_with_texttospeech_response(project_id, session_id, texts,
                                              language_code):
     """Returns the result of detect intent with texts as inputs and includes
     the response in an audio format.
@@ -74,21 +68,20 @@ def detect_intent_with_texttospeech_response(project_id, session_id, texts,
         response = session_client.detect_intent(
             session=session_path, query_input=query_input,
             output_audio_config=output_audio_config)
-
         print('=' * 20)
         print('Query text: {}'.format(response.query_result.query_text))
         print('Detected intent: {} (confidence: {})\n'.format(
             response.query_result.intent.display_name,
             response.query_result.intent_detection_confidence))
-        print('Fulfillment text: {}\n'.format(
-            response.query_result.fulfillment_text))
         # The response's audio_content is binary.
         with open('output.wav', 'wb') as out:
             out.write(response.output_audio)
             print('Audio content written to file "output.wav"')
+        print('Fulfillment text: {}\n'.format(
+            response.query_result.fulfillment_text))
 # [END dialogflow_detect_intent_with_texttospeech_response]
 
-def main():
+async def main():
     parser = argparse.ArgumentParser(
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -113,9 +106,11 @@ def main():
 
     args = parser.parse_args()
 
-    detect_intent_with_texttospeech_response(
+    await detect_intent_with_texttospeech_response(
         args.project_id, args.session_id, args.texts, args.language_code)
-    play('output.wav')
+    
 
 if __name__ == '__main__':
-    main()
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
+    play('output.wav')
