@@ -1,2 +1,2 @@
-# trash-talking
-reaio32
+# Trash Talking
+reaio32 hack week
