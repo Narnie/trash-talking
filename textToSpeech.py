@@ -108,8 +108,7 @@ async def main():
 
     await detect_intent_with_texttospeech_response(
         args.project_id, args.session_id, args.texts, args.language_code)
-    
-
+        
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
