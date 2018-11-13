@@ -19,7 +19,7 @@ import wave
 import asyncio
 
 # play text file
-def play(filename):
+async def play(filename):
     wf = wave.open(filename, 'rb')
     p = pyaudio.PyAudio()
     chunk = 1024
@@ -37,8 +37,6 @@ def play(filename):
     stream.close()
 
     p.terminate()
-
-
 
 # [START dialogflow_detect_intent_with_texttospeech_response]
 async def detect_intent_with_texttospeech_response(project_id, session_id, texts,

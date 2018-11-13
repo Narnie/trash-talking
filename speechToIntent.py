@@ -90,14 +90,20 @@ async def main():
         default='en-US')
 
     args = parser.parse_args()
-
-    sampleRate = listen.audio_int()
-    filename = await listen.listen_for_speech()  # listen to mic.
-    await detect_intent_audio(args.project_id, args.session_id, filename, args.language_code)
-    # await textToSpeech.detect_intent_with_texttospeech_response(args.project_id, args.session_id, text, args.language_code)
-
-        
+    while(True):
+        try:
+            sampleRate = listen.audio_int()
+            filename = await listen.listen_for_speech()  # listen to mic.
+            await detect_intent_audio(args.project_id, args.session_id, filename, args.language_code)
+            await textToSpeech.play('output.wav')
+            # await textToSpeech.detect_intent_with_texttospeech_response(args.project_id, args.session_id, text, args.language_code)
+        except EOFError as error:
+            # Output expected EOFErrors.
+            print(error)
+        except Exception as exception:
+            # Output unexpected Exceptions.
+            print(exception)
+    
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
-    textToSpeech.play('output.wav')
