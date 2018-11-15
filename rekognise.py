@@ -44,11 +44,9 @@ import signal
 import subprocess
 import sys
 
-
 from imageRekognition import *
 
 imagePath = "/tmp/aiyimage.jpg"
-
 
 def getImage():
   """Takes a fresh picture and returns it as an Image object"""
@@ -67,15 +65,18 @@ def getImage():
   # Loads the image into memory, ready for processing, and return it
   return None
   
-def takeAndProcessImage ():
-  """Performs all the tasks required to take a new photo and send to Google for analysis."""
-
-
+def takeAndProcessImage():
+  """ Takes the picture and passes it on to the image rekognition processor and returns 
+      a list of potentially matching labels
+  """
 
   # Request a new image to be processed
   getImage()
-
-  return detect_labels(copy_to_s3(imagePath))
+  results = detect_labels(copy_to_s3(imagePath))
+  if len(results) == 0:
+    return "NOTFOUND"
+  else:
+    return results
 
 # If this is the 'main' file (i.e. not being imported) then default to
 # processing an image for any labels
