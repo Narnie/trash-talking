@@ -19,10 +19,13 @@ import aiy.audio
 import aiy.cloudspeech
 import aiy.voicehat
 import subprocess
-import whatisthat
 import asyncio
-from  whatisthat2 import *
+from whatisthat2 import *
+import subprocess
 
+def say(text):
+    subprocess.call(['/home/pi/voice-synth/synth', text])
+    
 
 def queryDialogueFlow(text):
 
@@ -59,13 +62,13 @@ def main():
         print('Press the button and speak')
         button.wait_for_press()
         response = queryDialogueFlow("Ok Bender Bin")
-        aiy.audio.say(response)
+        say(response)
         button.wait_for_press()
         tags = takeAndProcessImage()
         print(tags)
         response = queryDialogueFlow(tags[0])
 
-        aiy.audio.say(response)
+        say(response)
        # in_convo = True
        # wh#ile in_convo:    
         #    filename = listen.listen_for_speech()  # listen to mic.
