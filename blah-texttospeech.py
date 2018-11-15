@@ -17,26 +17,12 @@ import sys
 import pyaudio
 import wave
 import asyncio
+import aiy.audio
+import aiy.cloudspeech
+import aiy.voicehat
+import subprocess
+import whatisthat
 
-# play text file
-async def play(filename):
-    wf = wave.open(filename, 'rb')
-    p = pyaudio.PyAudio()
-    chunk = 1024
-    stream = p.open(format =
-                    p.get_format_from_width(wf.getsampwidth()),
-                    channels = wf.getnchannels(),
-                    rate = wf.getframerate(),
-                    output = True)
-    data = wf.readframes(chunk)
-    while data != b'':
-        stream.write(data)
-        data = wf.readframes(chunk)
-
-    stream.stop_stream()
-    stream.close()
-
-    p.terminate()
 
 # [START dialogflow_detect_intent_with_texttospeech_response]
 async def detect_intent_with_texttospeech_response(project_id, session_id, texts,
@@ -79,7 +65,69 @@ async def detect_intent_with_texttospeech_response(project_id, session_id, texts
             response.query_result.fulfillment_text))
 # [END dialogflow_detect_intent_with_texttospeech_response]
 
+
 async def main():
+    recognizer = aiy.cloudspeech.get_recognizer()
+    recognizer.expect_phrase('what is that')
+    recognizer.expect_phrase('what logo is that')
+    recognizer.expect_phrase('what does that say')
+
+    button = aiy.voicehat.get_button()
+    led = aiy.voicehat.get_led()
+    aiy.audio.get_recorder().start()
+
+    while True:
+        print('Press the button and speak')
+        button.wait_for_press()
+        print('Listening...')
+        text = recognizer.recognize()
+        if text is None:
+            print('Sorry, I did not hear you.')
+        else:
+            # Clear the output variable, so we don't repeat any previous results
+            output = None
+ 
+            # Determine what action to take
+            if 'what is that' in text:
+                output = whatisthat.takeAndProcessImage('label')
+            elif 'what logo is that' in text:
+                output = whatisthat.takeAndProcessImage('logo')
+            elif 'what does that say' in text:
+                output = whatisthat.takeAndProcessImage('text')
+            elif 'goodbye' in text:
+                break
+            else:
+                detect_intent_with_texttospeech_response('evil-bin', str(uuid.uuid4()), text, 'en-US')
+
+            # If we got a result then both print and speak it. 
+            if output is not None:
+               print(output)
+               aiy.audio.say(output)
+
+
+# play text file
+async def play(filename):
+    wf = wave.open(filename, 'rb')
+    p = pyaudio.PyAudio()
+    chunk = 1024
+    stream = p.open(format =
+                    p.get_format_from_width(wf.getsampwidth()),
+                    channels = wf.getnchannels(),
+                    rate = wf.getframerate(),
+                    output = True)
+    data = wf.readframes(chunk)
+    while data != b'':
+        stream.write(data)
+        data = wf.readframes(chunk)
+
+    stream.stop_stream()
+    stream.close()
+
+    p.terminate()
+
+
+
+async def maintest():
     parser = argparse.ArgumentParser(
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -106,8 +154,9 @@ async def main():
 
     await detect_intent_with_texttospeech_response(
         args.project_id, args.session_id, args.texts, args.language_code)
-        
+    await play('output.wav')
+    
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
-    play('output.wav')
+    

@@ -4,3 +4,4 @@ pyaudio
 asyncio
 google-cloud-speech==0.26
 google-cloud-texttospeech
+numpy
