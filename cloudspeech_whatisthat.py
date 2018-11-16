@@ -20,7 +20,7 @@ import aiy.cloudspeech
 import aiy.voicehat
 import subprocess
 import asyncio
-from whatisthat2 import *
+from rekognise import takeAndProcessImage
 import subprocess
 
 def say(text):
@@ -60,19 +60,26 @@ def main():
 
     while True:
         print('Press the button and speak')
-        button.wait_for_press()
-        response = queryDialogueFlow("Ok Bender Bin")
-        say(response)
-        button.wait_for_press()
-        tags = takeAndProcessImage()
-        print(tags)
-        response = queryDialogueFlow(tags[0])
+       # button.wait_for_press()
+       # response = queryDialogueFlow("Ok Bender Bin")
+       # say(response)
+       # button.wait_for_press()
+       # tags = takeAndProcessImage()
+       # print(tags)
+       # response = queryDialogueFlow(tags[0])
 
-        say(response)
-       # in_convo = True
-       # wh#ile in_convo:    
-        #    filename = listen.listen_for_speech()  # listen to mic.
-         #   print(filename)
-          #  break
+        #say(response)
+        button.wait_for_press()
+        print('Listening...')
+        text = recognizer.recognize()
+        print('You said "', text, '"')
+        if 'hello' in text:
+            response = queryDialogueFlow("Ok Bender Bin")
+            say(response)
+        else: 
+            response = queryDialogueFlow(text)
+            say(response)
+
+
 if __name__ == '__main__':
     main()
