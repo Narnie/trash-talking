@@ -60,26 +60,29 @@ def main():
 
     while True:
         print('Press the button and speak')
-       # button.wait_for_press()
-       # response = queryDialogueFlow("Ok Bender Bin")
-       # say(response)
-       # button.wait_for_press()
-       # tags = takeAndProcessImage()
-       # print(tags)
-       # response = queryDialogueFlow(tags[0])
-
-        #say(response)
         button.wait_for_press()
         print('Listening...')
+        led.set_state(aiy.voicehat.LED.ON)
         text = recognizer.recognize()
+        led.set_state(aiy.voicehat.LED.BLINK)
         print('You said "', text, '"')
-        if 'hello' in text:
-            response = queryDialogueFlow("Ok Bender Bin")
+        if not text:
+            print('Sorry, I did not hear you.')
+            response = queryDialogueFlow("default")
             say(response)
-        else: 
-            response = queryDialogueFlow(text)
-            say(response)
+        else:
+            if 'hello' in text:
+                response = queryDialogueFlow("Ok Bender Bin")
+                say(response)
+            else: 
+                response = queryDialogueFlow(text)
+                if 'camera' in response:
+                    tags = takeAndProcessImage()
+                    print(tags)
+                    response = queryDialogueFlow(tags[0])
+                say(response)
 
+        led.set_state(aiy.voicehat.LED.OFF)
 
 if __name__ == '__main__':
     main()
